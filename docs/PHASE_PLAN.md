@@ -58,7 +58,7 @@ Following the delivery rules outlined in the PRD, this document tracks the step-
 - [x] **Task 2.2: Connected Accounts Dashboard UI**
   - Built `/accounts` page showing account list, avatar, handle, follower count, and status badges (`ACTIVE`, `EXPIRED`, `REVOKED`).
   - Implemented account disconnect action (`DELETE /api/accounts/[id]`).
-  - Added "+ Connect Demo Account" simulator for frictionless local development.
+  - Production OAuth connection flow with zero dummy accounts.
 - [x] **Task 2.3: Validation & Git Commit**
   - Verified lint and typecheck.
   - Committed Phase 02 changes.

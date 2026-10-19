@@ -2,17 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForTokens, getTikTokUserProfile } from "@/lib/tiktok";
 import { encryptToken } from "@/lib/crypto";
 import { prisma } from "@/lib/db";
-
-async function getOrCreateDefaultUser() {
-  return await prisma.user.upsert({
-    where: { email: "creator@postpilot.app" },
-    update: {},
-    create: {
-      email: "creator@postpilot.app",
-      name: "Alex Vance",
-    },
-  });
-}
+import { getDefaultUser } from "@/lib/user";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -30,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const user = await getOrCreateDefaultUser();
+    const user = await getDefaultUser();
 
     // Exchange code for tokens
     const tokens = await exchangeCodeForTokens(code);

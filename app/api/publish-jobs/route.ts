@@ -1,23 +1,13 @@
 import { NextRequest, NextResponse, connection } from "next/server";
 import { prisma } from "@/lib/db";
 import { enqueuePublishJobItem, enqueueScheduledJob } from "@/lib/queue";
-
-async function getOrCreateDefaultUser() {
-  return await prisma.user.upsert({
-    where: { email: "creator@postpilot.app" },
-    update: {},
-    create: {
-      email: "creator@postpilot.app",
-      name: "Alex Vance",
-    },
-  });
-}
+import { getDefaultUser } from "@/lib/user";
 
 // GET: List recent publish jobs
 export async function GET() {
   await connection();
   try {
-    const user = await getOrCreateDefaultUser();
+    const user = await getDefaultUser();
 
     const jobs = await prisma.publishJob.findMany({
       where: { userId: user.id },
@@ -99,7 +89,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await getOrCreateDefaultUser();
+    const user = await getDefaultUser();
 
     // 1. Verify Video Asset
     const videoAsset = await prisma.videoAsset.findUnique({
@@ -149,35 +139,23 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      try {
-        await enqueueScheduledJob(
-          {
-            publishJobId: publishJob.id,
-            scheduledFor: scheduleDate.toISOString(),
-          },
-          delayMs
-        );
-      } catch (queueErr: unknown) {
-        const queueErrMsg = queueErr instanceof Error ? queueErr.message : "Queue dispatch unavailable";
-        console.warn("Queue notice (delayed dispatch):", queueErrMsg);
-      }
+      await enqueueScheduledJob(
+        {
+          publishJobId: publishJob.id,
+          scheduledFor: scheduleDate.toISOString(),
+        },
+        delayMs
+      );
     } else {
       // Fan-out to worker queue
       for (const item of publishJob.items) {
-        try {
-          await enqueuePublishJobItem({
-            publishJobId: publishJob.id,
-            publishJobItemId: item.id,
-            accountId: item.accountId,
-            videoAssetId: videoAsset.id,
-            caption: item.customCaption || publishJob.defaultCaption,
-          });
-        } catch (queueErr: unknown) {
-          const queueErrMsg = queueErr instanceof Error ? queueErr.message : "Queue dispatch unavailable";
-          console.warn(`Queue notice (item ${item.id}):`, queueErrMsg);
-          // If Redis is not available locally, mark item or execute simulation
-          simulateLocalExecutionIfRedisOffline(publishJob.id, item.id);
-        }
+        await enqueuePublishJobItem({
+          publishJobId: publishJob.id,
+          publishJobItemId: item.id,
+          accountId: item.accountId,
+          videoAssetId: videoAsset.id,
+          caption: item.customCaption || publishJob.defaultCaption,
+        });
       }
     }
 
@@ -198,42 +176,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// Fallback simulator if Redis queue daemon is not active locally
-async function simulateLocalExecutionIfRedisOffline(publishJobId: string, itemId: string) {
-  setTimeout(async () => {
-    try {
-      await prisma.publishJobItem.update({
-        where: { id: itemId },
-        data: { status: "UPLOADING" },
-      });
-      setTimeout(async () => {
-        try {
-          await prisma.publishJobItem.update({
-            where: { id: itemId },
-            data: {
-              status: "PUBLISHED",
-              publishedAt: new Date(),
-              tiktokPublishId: `sim_pub_${Date.now()}`,
-              tiktokShareId: `sim_share_${Date.now()}`,
-            },
-          });
-
-          // Check parent completion
-          const items = await prisma.publishJobItem.findMany({ where: { publishJobId } });
-          const allPublished = items.every((i) => i.status === "PUBLISHED");
-          if (allPublished) {
-            await prisma.publishJob.update({
-              where: { id: publishJobId },
-              data: {
-                status: "COMPLETED",
-                successCount: items.length,
-              },
-            });
-          }
-        } catch {}
-      }, 2000);
-    } catch {}
-  }, 1000);
 }

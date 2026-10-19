@@ -1,17 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveVideoFile } from "@/lib/storage";
 import { prisma } from "@/lib/db";
-
-async function getOrCreateDefaultUser() {
-  return await prisma.user.upsert({
-    where: { email: "creator@postpilot.app" },
-    update: {},
-    create: {
-      email: "creator@postpilot.app",
-      name: "Alex Vance",
-    },
-  });
-}
+import { getDefaultUser } from "@/lib/user";
 
 // Allowed video MIME types
 const ALLOWED_MIME_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
@@ -43,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await getOrCreateDefaultUser();
+    const user = await getDefaultUser();
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 

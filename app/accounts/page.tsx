@@ -10,7 +10,6 @@ import {
   Trash2, 
   RefreshCw, 
   ExternalLink, 
-  Sparkles, 
   CheckCircle2, 
   AlertCircle 
 } from "lucide-react";
@@ -43,21 +42,6 @@ export default function AccountsPage() {
     return null;
   });
 
-  const fetchAccounts = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch("/api/accounts");
-      const data = await res.json();
-      if (data.success) {
-        setAccounts(data.accounts);
-      }
-    } catch (err: unknown) {
-      console.error("Failed to load accounts", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     let isMounted = true;
     async function load() {
@@ -80,7 +64,7 @@ export default function AccountsPage() {
     };
   }, []);
 
-  const handleConnectTikTok = async (mock = false) => {
+  const handleConnectTikTok = async () => {
     try {
       setIsConnecting(true);
       setNotification(null);
@@ -88,17 +72,11 @@ export default function AccountsPage() {
       const res = await fetch("/api/auth/tiktok/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mock }),
       });
 
       const data = await res.json();
-      if (data.success) {
-        if (data.authUrl) {
-          window.location.href = data.authUrl;
-        } else if (data.mock) {
-          setNotification({ type: "success", message: "Demo TikTok account connected successfully!" });
-          fetchAccounts();
-        }
+      if (data.success && data.authUrl) {
+        window.location.href = data.authUrl;
       } else {
         setNotification({ type: "error", message: data.error || "Failed to initiate TikTok connection." });
       }
@@ -138,7 +116,7 @@ export default function AccountsPage() {
           subtitle="Manage authorized TikTok creators & profiles for bulk publishing"
           action={{
             label: "Connect TikTok Account",
-            onClick: () => handleConnectTikTok(false),
+            onClick: handleConnectTikTok,
             icon: Plus,
           }}
         />
@@ -170,7 +148,7 @@ export default function AccountsPage() {
             </div>
           )}
 
-          {/* Quick Metrics & Mode Banner */}
+          {/* Quick Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5">
               <span className="text-xs font-medium text-zinc-400">Total Accounts</span>
@@ -190,16 +168,14 @@ export default function AccountsPage() {
               </div>
             </div>
 
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between">
-              <span className="text-xs font-medium text-zinc-400">Developer Testing</span>
-              <button
-                onClick={() => handleConnectTikTok(true)}
-                disabled={isConnecting}
-                className="mt-2 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold py-2 px-3 rounded-xl transition-colors cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#25f4ee]" />
-                <span>+ Connect Demo Account</span>
-              </button>
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5">
+              <span className="text-xs font-medium text-zinc-400">Action Required</span>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-amber-400">
+                  {accounts.filter((a) => a.status !== "ACTIVE").length}
+                </span>
+                <span className="text-xs text-zinc-500">needs re-auth</span>
+              </div>
             </div>
           </div>
 
@@ -217,22 +193,15 @@ export default function AccountsPage() {
               </div>
               <h3 className="text-lg font-bold text-white mb-2">No TikTok Accounts Connected</h3>
               <p className="text-sm text-zinc-400 max-w-md mx-auto mb-6">
-                Connect your first TikTok account through OAuth or generate a demo account to start bulk publishing videos.
+                Connect your first TikTok creator account via OAuth 2.0 to begin bulk publishing videos.
               </p>
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center">
                 <button
-                  onClick={() => handleConnectTikTok(false)}
+                  onClick={handleConnectTikTok}
                   disabled={isConnecting}
-                  className="bg-[#fe2c55] hover:bg-[#e0264b] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-md shadow-[#fe2c55]/20 cursor-pointer"
+                  className="bg-[#fe2c55] hover:bg-[#e0264b] text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-all shadow-md shadow-[#fe2c55]/20 cursor-pointer"
                 >
-                  Connect Official TikTok
-                </button>
-                <button
-                  onClick={() => handleConnectTikTok(true)}
-                  disabled={isConnecting}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
-                >
-                  + Add Demo Account
+                  Connect TikTok Account
                 </button>
               </div>
             </div>

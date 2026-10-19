@@ -1,21 +1,11 @@
 import { NextResponse, connection } from "next/server";
 import { prisma } from "@/lib/db";
-
-async function getOrCreateDefaultUser() {
-  return await prisma.user.upsert({
-    where: { email: "creator@postpilot.app" },
-    update: {},
-    create: {
-      email: "creator@postpilot.app",
-      name: "Alex Vance",
-    },
-  });
-}
+import { getDefaultUser } from "@/lib/user";
 
 export async function GET() {
   await connection();
   try {
-    const user = await getOrCreateDefaultUser();
+    const user = await getDefaultUser();
 
     const accounts = await prisma.tikTokAccount.findMany({
       where: { userId: user.id },

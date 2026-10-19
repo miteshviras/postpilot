@@ -31,7 +31,10 @@ services:
       timeout: 5s
       retries: 5
 
+  # Optional S3-compatible storage (enable with --profile storage)
   minio:
+    profiles:
+      - storage
     image: minio/minio:latest
     container_name: postpilot-minio
     restart: unless-stopped
@@ -52,6 +55,7 @@ services:
       target: runner
     container_name: postpilot-web
     restart: unless-stopped
+    command: sh -c "npx prisma db push && npm run start"
     ports:
       - "3000:3000"
     environment:
@@ -65,11 +69,8 @@ services:
       - TIKTOK_REDIRECT_URI=${TIKTOK_REDIRECT_URI:-http://localhost:3000/api/auth/tiktok/callback}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
       - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
-      - MINIO_ENDPOINT=minio
-      - MINIO_PORT=9000
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-postpilot_minio}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-postpilot_minio_secret}
-      - AWS_BUCKET=${AWS_BUCKET:-postpilot-videos}
+    volumes:
+      - uploads_data:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,11 +92,8 @@ services:
       - TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET:-mock_tiktok_client_secret}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
       - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
-      - MINIO_ENDPOINT=minio
-      - MINIO_PORT=9000
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-postpilot_minio}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-postpilot_minio_secret}
-      - AWS_BUCKET=${AWS_BUCKET:-postpilot-videos}
+    volumes:
+      - uploads_data:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,4 +103,5 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  uploads_data:
   minio_data:

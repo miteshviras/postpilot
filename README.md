@@ -85,7 +85,7 @@ flowchart TD
 | Screen | Route | Key Features |
 | :--- | :--- | :--- |
 | **Overview Dashboard** | `/` | System health indicators, architecture checklist, workflow pillars, and quick navigation. |
-| **Connected Accounts** | `/accounts` | Authorized TikTok profiles, follower counts, status chips (`ACTIVE`, `EXPIRED`, `REVOKED`), account disconnect, and "+ Connect Demo Account" simulator. |
+| **Connected Accounts** | `/accounts` | Authorized TikTok profiles, follower counts, status chips (`ACTIVE`, `EXPIRED`, `REVOKED`), and secure account disconnect. |
 | **Bulk Composer** | `/composer` | Video drag-and-drop uploader with HTML5 player preview, caption editor with hashtag presets, multi-account checklist (Select All/None), custom captions per account toggle, and schedule picker. |
 | **Job Progress Monitor** | `/jobs/[id]` | Real-time circular SVG progress ring, per-account status chips (`PENDING`, `UPLOADING`, `PROCESSING`, `PUBLISHED`, `FAILED`), expandable TikTok error drawer, and one-click "Retry Failed Accounts". |
 | **Job Listing** | `/jobs` | High-level summary of all past and active bulk publish workflows. |
@@ -136,7 +136,7 @@ docker compose version
 
 ### 2. Workflow A: Full Docker Compose Stack (Recommended)
 
-Run the entire application, database, queue, worker, and storage with a single command:
+Run the entire application, database, queue, worker, and shared video storage with a single command:
 
 ```bash
 # 1. Clone the repository
@@ -146,9 +146,12 @@ cd postpilot
 # 2. Configure environment file
 cp .env.example .env
 
-# 3. Build and launch all containers in detached mode
+# 3. Build and launch all primary containers in detached mode
 docker compose up --build -d
 ```
+
+> [!NOTE]
+> **Automatic Schema Initialization**: On container startup, `postpilot-web` automatically executes `npx prisma db push` to configure PostgreSQL tables. You can open [http://localhost:3000](http://localhost:3000) immediately!
 
 #### Verifying Services & Health
 Check container statuses and healthchecks:
@@ -158,17 +161,23 @@ docker compose ps
 
 | Service | Container Name | Port Mapping | Description & Health |
 | :--- | :--- | :--- | :--- |
-| **`web`** | `postpilot-web` | `3000:3000` | Next.js 16 Web Application UI & API routes |
+| **`web`** | `postpilot-web` | `3000:3000` | Next.js 16 Web Application UI & API routes (App Router) |
 | **`worker`** | `postpilot-worker` | Internal | BullMQ background publishing & scheduling worker |
 | **`postgres`** | `postpilot-postgres` | `5432:5432` | PostgreSQL 16 DB (`pg_isready` healthcheck) |
 | **`redis`** | `postpilot-redis` | `6379:6379` | Redis 7 queue store (`redis-cli ping` healthcheck) |
-| **`minio`** | `postpilot-minio` | `9000:9000`, `9001:9001` | S3-compatible video storage & Web Console |
+| **`minio`** *(Optional)* | `postpilot-minio` | `9000:9000`, `9001:9001` | S3-compatible storage *(gated under `--profile storage`)* |
 
-#### Seed Demo Accounts Inside Docker
-Populate the PostgreSQL database inside Docker with sample creators and demo TikTok profiles:
+#### Shared Volume Architecture
+In containerized local storage mode (`STORAGE_PROVIDER=local`), `web` and `worker` share a Docker volume:
+- `uploads_data:/app/public/uploads`
+This ensures any video uploaded via the web interface is instantly accessible to the background worker process for TikTok chunked uploading and transcoding without extra network overhead.
+
+#### Enabling MinIO S3 Object Storage (Optional)
+If you wish to run a local S3-compatible MinIO object store alongside the stack:
 ```bash
-docker compose exec web npm run seed
+docker compose --profile storage up -d minio
 ```
+*(MinIO Web Console is exposed on [http://localhost:9001](http://localhost:9001) with username `postpilot_minio` and password `postpilot_minio_secret`).*
 
 #### Streaming Container Logs
 ```bash
@@ -195,11 +204,12 @@ docker compose down -v
 For rapid frontend styling and instant Turbopack hot-reloads, you can run PostgreSQL and Redis in Docker while running Next.js and the worker process natively:
 
 ```bash
-# 1. Start only database, queue, and object storage in Docker
-docker compose up -d postgres redis minio
+# 1. Start only database and queue in Docker
+docker compose up -d postgres redis
 
-# 2. In your local terminal, generate Prisma client and seed DB
+# 2. In your local terminal, generate Prisma client and push schema
 npm run db:generate
+npx prisma db push
 npm run seed
 
 # 3. Terminal 1: Start Next.js development server
@@ -225,9 +235,6 @@ docker compose exec postgres psql -U postpilot -d postpilot
 
 # Ping Redis to test queue responsiveness
 docker compose exec redis redis-cli ping
-
-# Inspect MinIO storage console
-# Open http://localhost:9001 in your browser (User: postpilot_minio, Pass: postpilot_minio_secret)
 ```
 
 ---
@@ -238,11 +245,12 @@ docker compose exec redis redis-cli ping
   - Docker Desktop is not currently started. Launch Docker Desktop from the Start Menu and wait for the whale icon in the taskbar to turn solid green.
 - **Error: `bind: address already in use` (Port 5432 or 6379)**:
   - You likely have a native PostgreSQL or Redis instance running locally. Stop your local service (`Stop-Service postgresql*` on Windows or `sudo systemctl stop postgresql`) or update the host port mapping in `docker-compose.yml` (e.g. `"5433:5432"`).
+- **Error: `pull access denied for minio/minio`**:
+  - Docker Hub restricts anonymous pulls on unversioned `minio/minio:latest`. MinIO is optional and isolated behind `--profile storage`. Running `docker compose up --build -d` runs the default local storage mode with zero external Docker Hub dependencies.
 - **Resetting Database Schema in Docker**:
   ```bash
   docker compose down -v
-  docker compose up -d postgres redis
-  docker compose exec web npx prisma db push
+  docker compose up -d
   ```
 
 ---
@@ -278,13 +286,13 @@ REDIS_URL="redis://localhost:6379"
 ENCRYPTION_KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 ```
 
-#### 4. Initialize Database & Seed Demo Data
+#### 4. Initialize Database
 ```bash
 # Generate the Prisma 7 client
 npm run db:generate
 
-# (Optional) Seed demo user and sample TikTok accounts
-npm run seed
+# Push schema to database
+npx prisma db push
 ```
 
 #### 5. Start the Application
