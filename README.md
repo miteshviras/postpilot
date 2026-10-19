@@ -109,38 +109,141 @@ All system specifications, design blueprints, and execution plans are preserved 
 
 You can run PostPilot either fully containerized via **Docker Compose** (recommended for production and complete parity) or via **Local Development** on your workstation.
 
-### Option 1: Docker Compose (One-Command Setup)
+## 🐳 Docker Guide for Local Setup
 
-The stack is containerized with 5 orchestrated services (`web`, `worker`, `postgres`, `redis`, `minio`):
+PostPilot is designed from the ground up to run seamlessly inside Docker. You have two flexible workflows for local development:
+1. **Full Docker Stack**: Everything runs inside containers (`web`, `worker`, `postgres`, `redis`, `minio`).
+2. **Hybrid Workflow**: Docker powers the backing infrastructure (`postgres`, `redis`, `minio`), while you run Next.js and the background worker natively with instant Turbopack hot reload.
+
+---
+
+### 1. Prerequisites & Engine Verification
+
+Ensure Docker and Docker Compose are installed and running:
+
+- **Windows**: [Docker Desktop](https://www.docker.com/products/docker-desktop/) with WSL 2 backend enabled.
+- **macOS**: Docker Desktop with Apple Silicon / Intel virtualization enabled.
+- **Linux**: Docker Engine + Docker Compose plugin (`docker compose version`).
+
+Verify your Docker daemon is active:
+```bash
+docker info
+docker compose version
+```
+*(If you see an error like `cannot connect to the Docker daemon`, make sure Docker Desktop is launched and running).*
+
+---
+
+### 2. Workflow A: Full Docker Compose Stack (Recommended)
+
+Run the entire application, database, queue, worker, and storage with a single command:
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/miteshviras/postpilot.git
 cd postpilot
 
-# 2. Copy the environment configuration
+# 2. Configure environment file
 cp .env.example .env
 
-# 3. Build and launch all services in background
+# 3. Build and launch all containers in detached mode
 docker compose up --build -d
 ```
 
-#### Verifying Docker Containers
+#### Verifying Services & Health
+Check container statuses and healthchecks:
 ```bash
 docker compose ps
 ```
 
-Expected running services:
-- **`postpilot-web`**: Next.js 16 Web Application ([http://localhost:3000](http://localhost:3000))
-- **`postpilot-worker`**: BullMQ Background Worker process
-- **`postpilot-postgres`**: PostgreSQL 16 database (port `5432`)
-- **`postpilot-redis`**: Redis 7 queue store (port `6379`)
-- **`postpilot-minio`**: MinIO S3 Object Storage Console ([http://localhost:9001](http://localhost:9001))
+| Service | Container Name | Port Mapping | Description & Health |
+| :--- | :--- | :--- | :--- |
+| **`web`** | `postpilot-web` | `3000:3000` | Next.js 16 Web Application UI & API routes |
+| **`worker`** | `postpilot-worker` | Internal | BullMQ background publishing & scheduling worker |
+| **`postgres`** | `postpilot-postgres` | `5432:5432` | PostgreSQL 16 DB (`pg_isready` healthcheck) |
+| **`redis`** | `postpilot-redis` | `6379:6379` | Redis 7 queue store (`redis-cli ping` healthcheck) |
+| **`minio`** | `postpilot-minio` | `9000:9000`, `9001:9001` | S3-compatible video storage & Web Console |
+
+#### Seed Demo Accounts Inside Docker
+Populate the PostgreSQL database inside Docker with sample creators and demo TikTok profiles:
+```bash
+docker compose exec web npm run seed
+```
+
+#### Streaming Container Logs
+```bash
+# Follow logs across web and background worker
+docker compose logs -f web worker
+
+# Or inspect worker publishing actions specifically
+docker compose logs -f worker
+```
 
 #### Stopping the Stack
 ```bash
+# Stop containers while preserving database and video volumes
 docker compose down
+
+# Stop containers AND reset all database/queue volumes (clean slate)
+docker compose down -v
 ```
+
+---
+
+### 3. Workflow B: Hybrid Setup (Docker Infrastructure + Local Next.js)
+
+For rapid frontend styling and instant Turbopack hot-reloads, you can run PostgreSQL and Redis in Docker while running Next.js and the worker process natively:
+
+```bash
+# 1. Start only database, queue, and object storage in Docker
+docker compose up -d postgres redis minio
+
+# 2. In your local terminal, generate Prisma client and seed DB
+npm run db:generate
+npm run seed
+
+# 3. Terminal 1: Start Next.js development server
+npm run dev
+
+# 4. Terminal 2: Start background worker processor
+npm run worker
+```
+
+---
+
+### 4. Docker CLI Cheat Sheet for PostPilot
+
+```bash
+# Rebuild web & worker after modifying package dependencies
+docker compose build --no-cache web worker
+
+# Restart only the background worker process
+docker compose restart worker
+
+# Open an interactive PostgreSQL psql shell inside the container
+docker compose exec postgres psql -U postpilot -d postpilot
+
+# Ping Redis to test queue responsiveness
+docker compose exec redis redis-cli ping
+
+# Inspect MinIO storage console
+# Open http://localhost:9001 in your browser (User: postpilot_minio, Pass: postpilot_minio_secret)
+```
+
+---
+
+### 5. Troubleshooting Local Docker
+
+- **Error: `failed to connect to the docker API at npipe://...` (Windows)**:
+  - Docker Desktop is not currently started. Launch Docker Desktop from the Start Menu and wait for the whale icon in the taskbar to turn solid green.
+- **Error: `bind: address already in use` (Port 5432 or 6379)**:
+  - You likely have a native PostgreSQL or Redis instance running locally. Stop your local service (`Stop-Service postgresql*` on Windows or `sudo systemctl stop postgresql`) or update the host port mapping in `docker-compose.yml` (e.g. `"5433:5432"`).
+- **Resetting Database Schema in Docker**:
+  ```bash
+  docker compose down -v
+  docker compose up -d postgres redis
+  docker compose exec web npx prisma db push
+  ```
 
 ---
 
