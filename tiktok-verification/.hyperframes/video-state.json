@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "historyId": "baa0e76f-fcdb-4dd4-a40c-657feb4ab84e",
+  "currentRevision": null,
+  "pendingChanges": false,
+  "files": {
+    "AGENTS.md": {
+      "hash": "1d4f0c8ca2507b94fd7c9df709fff01416adbd51a0f922b9d6ed2f40129147d5",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\1d\\1d4f0c8ca2507b94fd7c9df709fff01416adbd51a0f922b9d6ed2f40129147d5"
+    },
+    "CLAUDE.md": {
+      "hash": "1d4f0c8ca2507b94fd7c9df709fff01416adbd51a0f922b9d6ed2f40129147d5",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\1d\\1d4f0c8ca2507b94fd7c9df709fff01416adbd51a0f922b9d6ed2f40129147d5"
+    },
+    "assets/audio/audio_list.txt": {
+      "hash": "f09128c19214486ff1827288c8641a08623301aff9b3b885f2630e6e057198ef",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\f0\\f09128c19214486ff1827288c8641a08623301aff9b3b885f2630e6e057198ef"
+    },
+    "assets/audio/scene1_intro.wav": {
+      "hash": "d42687c225a8bef9cb4b01fe5232260e9762c56feb2752f88c7908729620ea1b",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\d4\\d42687c225a8bef9cb4b01fe5232260e9762c56feb2752f88c7908729620ea1b"
+    },
+    "assets/audio/scene2_loginkit.wav": {
+      "hash": "dabe5f68579119e17a907a88726a925fb713141a3354c0dbf83421dd78828622",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\da\\dabe5f68579119e17a907a88726a925fb713141a3354c0dbf83421dd78828622"
+    },
+    "assets/audio/scene3_composer.wav": {
+      "hash": "e11ceda96a8fd5e081a64d3813af79acfcfd2461e22b2cc1b1fb4d8d0c97245d",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\e1\\e11ceda96a8fd5e081a64d3813af79acfcfd2461e22b2cc1b1fb4d8d0c97245d"
+    },
+    "assets/audio/scene4_monitor.wav": {
+      "hash": "979e93d00f9dfc7528bfbece37c0f9808064292877bfefc1f5bf4efff54f70ce",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\97\\979e93d00f9dfc7528bfbece37c0f9808064292877bfefc1f5bf4efff54f70ce"
+    },
+    "assets/audio/scene5_closing.wav": {
+      "hash": "48fe6dfad2f29174e3c3d02fe9adbc30a2ef78afc5c9ddd5171b038786cf2746",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\48\\48fe6dfad2f29174e3c3d02fe9adbc30a2ef78afc5c9ddd5171b038786cf2746"
+    },
+    "hyperframes.json": {
+      "hash": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\53\\53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    "index.html": {
+      "hash": "39a46e4929d56b89fe48d0eb88d5bd467eadb4906142082992410651d6c32cd9",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\39\\39a46e4929d56b89fe48d0eb88d5bd467eadb4906142082992410651d6c32cd9"
+    },
+    "meta.json": {
+      "hash": "cdfed789c410eec3d7815faaf52957d0619782bbd35ef7c5c44097a119e8f92c",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\cd\\cdfed789c410eec3d7815faaf52957d0619782bbd35ef7c5c44097a119e8f92c"
+    },
+    "package.json": {
+      "hash": "7f25025635f42cac9b3e9d8133a34a98667ea521b5ba3293e9fa9c4a886f87c3",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\7f\\7f25025635f42cac9b3e9d8133a34a98667ea521b5ba3293e9fa9c4a886f87c3"
+    },
+    "assets/audio/voiceover_master.wav": {
+      "hash": "cfcbd6e5b7feecc17b1a455675221b8793e02fe1cc2849ba56b325ee64012123",
+      "content": "C:\\Users\\mitesh\\.cache\\hyperframes\\history\\baa0e76f-fcdb-4dd4-a40c-657feb4ab84e\\blobs\\cf\\cfcbd6e5b7feecc17b1a455675221b8793e02fe1cc2849ba56b325ee64012123"
+    }
+  },
+  "revisions": {},
+  "checks": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "e01b3124-89d9-407f-a362-3f7dcb099fa4",
+      "completedAt": 1792413200051,
+      "output": "C:\\Users\\mitesh\\PersonalProjects\\postpilot\\tiktok-verification\\tiktok_verification_demo.mp4",
+      "status": "completed",
+      "revision": null
+    },
+    "retainedRevisions": []
+  },
+  "pendingArtifactCleanup": []
+}

@@ -1,0 +1,5 @@
+file 'scene1_intro.wav'
+file 'scene2_loginkit.wav'
+file 'scene3_composer.wav'
+file 'scene4_monitor.wav'
+file 'scene5_closing.wav'

@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>PostPilot - TikTok Developer Verification Walkthrough</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #09090b;
+        color: #f4f4f5;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 80% 20%, rgba(254, 44, 85, 0.12) 0%, transparent 40%),
+                    radial-gradient(circle at 20% 80%, rgba(37, 244, 238, 0.09) 0%, transparent 45%),
+                    #09090b;
+      }
+
+      /* Global Header Navigation */
+      .top-navbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 60px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(9, 9, 11, 0.85);
+        backdrop-filter: blur(16px);
+        z-index: 100;
+      }
+      .brand-box {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .logo-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #fe2c55, #25f4ee);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(254, 44, 85, 0.35);
+      }
+      .brand-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+      }
+      .brand-subtitle {
+        font-size: 13px;
+        color: #a1a1aa;
+        font-weight: 500;
+      }
+      .domain-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #25f4ee;
+        letter-spacing: 0.02em;
+      }
+      .review-tag {
+        background: rgba(254, 44, 85, 0.15);
+        border: 1px solid rgba(254, 44, 85, 0.35);
+        color: #fe2c55;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Scene Container */
+      .scene {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        width: 1920px;
+        height: 1000px;
+        padding: 50px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      /* Common Typography */
+      .scene-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 24px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        width: fit-content;
+      }
+      .badge-red {
+        background: rgba(254, 44, 85, 0.15);
+        color: #fe2c55;
+        border: 1px solid rgba(254, 44, 85, 0.3);
+      }
+      .badge-cyan {
+        background: rgba(37, 244, 238, 0.15);
+        color: #25f4ee;
+        border: 1px solid rgba(37, 244, 238, 0.3);
+      }
+      .badge-purple {
+        background: rgba(168, 85, 247, 0.15);
+        color: #c084fc;
+        border: 1px solid rgba(168, 85, 247, 0.3);
+      }
+      .badge-emerald {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
+      .scene-title {
+        font-size: 48px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 14px;
+        color: #ffffff;
+      }
+      .scene-desc {
+        font-size: 20px;
+        color: #a1a1aa;
+        line-height: 1.5;
+        max-width: 900px;
+        margin-bottom: 36px;
+      }
+
+      /* Card Grid */
+      .cards-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .glass-card {
+        background: rgba(24, 24, 27, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(12px);
+      }
+      .card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        font-size: 22px;
+      }
+      .card-title {
+        font-size: 19px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #ffffff;
+      }
+      .card-desc {
+        font-size: 14px;
+        color: #a1a1aa;
+        line-height: 1.5;
+      }
+
+      /* UI Mockup Panels */
+      .mockup-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: center;
+      }
+      .mockup-window {
+        background: #121215;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      }
+      .mockup-bar {
+        background: #18181b;
+        height: 38px;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .mockup-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .mockup-content {
+        padding: 28px;
+      }
+
+      /* Progress Ring */
+      .progress-box {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        background: rgba(254, 44, 85, 0.06);
+        border: 1px solid rgba(254, 44, 85, 0.2);
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+      }
+
+      /* Scope Pill Highlight */
+      .scope-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(37, 244, 238, 0.12);
+        border: 1px solid rgba(37, 244, 238, 0.35);
+        color: #25f4ee;
+        font-family: monospace;
+        font-size: 13px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+
+      /* Bottom Progress Bar */
+      .bottom-timeline {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        z-index: 100;
+      }
+      .bottom-progress {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #fe2c55, #25f4ee);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="58"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Audio Soundtrack Voiceover -->
+      <audio
+        id="master-voiceover"
+        src="./assets/audio/voiceover_master.wav"
+        data-start="0"
+        data-duration="57.3"
+        data-has-audio="true"
+      ></audio>
+
+      <!-- Persistent Top Navigation -->
+      <header id="global-navbar" class="top-navbar">
+        <div class="brand-box">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">CreativeAppsLab PostPilot</div>
+            <div class="brand-subtitle">TikTok Content Posting & Multi-Account Management</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="domain-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25f4ee" stroke-width="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>https://creativeappslab.com/</span>
+          </div>
+          <div class="review-tag">App Verification Demo</div>
+        </div>
+      </header>
+
+      <!-- SCENE 1: Introduction (0s - 8.2s) -->
+      <section id="scene1" class="scene clip" data-start="0" data-duration="8.2" data-track-index="0">
+        <div id="scene1-badge" class="scene-badge badge-red">Platform Overview</div>
+        <h1 id="scene1-title" class="scene-title">
+          Unified Multi-Account Publishing <br />
+          Built Specifically for TikTok Creators
+        </h1>
+        <p id="scene1-desc" class="scene-desc">
+          CreativeAppsLab PostPilot allows agencies and video creators to connect their TikTok accounts, upload short-form videos once, and dispatch posts simultaneously.
+        </p>
+
+        <div id="scene1-cards" class="cards-row">
+          <div class="glass-card">
+            <div class="card-icon" style="background: rgba(254, 44, 85, 0.15); color: #fe2c55;">⚡</div>
+            <div class="card-title">Single Upload Fan-Out</div>
+            <div class="card-desc">Upload high-definition 9:16 videos once and dispatch to multiple selected creator profiles at the same time.</div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-icon" style="background: rgba(37, 244, 238, 0.15); color: #25f4ee;">🔒</div>
+            <div class="card-title">OAuth 2.0 & Token Vault</div>
+            <div class="card-desc">Tokens are encrypted using AES-256-GCM at rest with automatic background token rotation before expiry.</div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">📊</div>
+            <div class="card-title">Queue & Error Isolation</div>
+            <div class="card-desc">BullMQ background worker isolates transient network issues and provides one-click retries without duplicate posts.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCENE 2: Login Kit & user.info.basic (8.2s - 22.4s) -->
+      <section id="scene2" class="scene clip" data-start="8.2" data-duration="14.2" data-track-index="1">
+        <div class="mockup-grid">
+          <div>
+            <div id="scene2-badge" class="scene-badge badge-cyan">Product 1: TikTok Login Kit</div>
+            <h1 id="scene2-title" class="scene-title">
+              Secure OAuth 2.0 Authorization & <br />
+              <span class="scope-chip" style="font-size: 26px; vertical-align: middle;">user.info.basic</span> Scope
+            </h1>
+            <p id="scene2-desc" class="scene-desc" style="font-size: 17px; margin-bottom: 24px;">
+              Creators authorize access via TikTok Login Kit. The <strong style="color: #25f4ee;">user.info.basic</strong> scope is strictly used to identify the creator and display their profile in their personal PostPilot dashboard.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="color: #34d399; font-size: 20px;">✓</div>
+                <div style="font-size: 14px; color: #d4d4d8;">Retrieves <strong style="color: #fff;">OpenID</strong>, <strong style="color: #fff;">display name</strong>, and <strong style="color: #fff;">avatar image</strong>.</div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="color: #34d399; font-size: 20px;">✓</div>
+                <div style="font-size: 14px; color: #d4d4d8;">Allows creators to distinguish between multiple personal and brand accounts.</div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="color: #34d399; font-size: 20px;">✓</div>
+                <div style="font-size: 14px; color: #d4d4d8;">One-click account disconnect and token revocation at any time.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UI Mockup: Connected Accounts -->
+          <div id="scene2-mockup" class="mockup-window">
+            <div class="mockup-bar">
+              <div class="mockup-dot" style="background: #ef4444;"></div>
+              <div class="mockup-dot" style="background: #f59e0b;"></div>
+              <div class="mockup-dot" style="background: #10b981;"></div>
+              <span style="font-size: 11px; color: #71717a; margin-left: 8px;">postpilot.creativeappslab.com/accounts</span>
+            </div>
+            <div class="mockup-content">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <span style="font-size: 15px; font-weight: 700; color: #fff;">Connected Creators</span>
+                <span style="background: #fe2c55; color: #fff; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 8px;">+ Connect TikTok Account</span>
+              </div>
+
+              <div style="background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: #27272a; display: flex; align-items: center; justify-content: center; font-weight: 700;">C1</div>
+                  <div>
+                    <div style="font-size: 14px; font-weight: 700; color: #fff;">Creative Fitness Studio</div>
+                    <div style="font-size: 12px; color: #71717a;">@creative_fitness • 42.5K followers</div>
+                  </div>
+                </div>
+                <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px;">ACTIVE</span>
+              </div>
+
+              <div style="background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: #27272a; display: flex; align-items: center; justify-content: center; font-weight: 700;">C2</div>
+                  <div>
+                    <div style="font-size: 14px; font-weight: 700; color: #fff;">Creative Daily Vlogs</div>
+                    <div style="font-size: 12px; color: #71717a;">@creative_vlogs • 88.1K followers</div>
+                  </div>
+                </div>
+                <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px;">ACTIVE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCENE 3: Content Posting API (22.4s - 35.0s) -->
+      <section id="scene3" class="scene clip" data-start="22.4" data-duration="12.6" data-track-index="2">
+        <div class="mockup-grid">
+          <div>
+            <div id="scene3-badge" class="scene-badge badge-red">Product 2: Content Posting API</div>
+            <h1 id="scene3-title" class="scene-title">
+              Bulk Video Composer & <br />
+              <span class="scope-chip" style="font-size: 24px; vertical-align: middle;">video.publish</span>
+              <span class="scope-chip" style="font-size: 24px; vertical-align: middle;">video.upload</span>
+            </h1>
+            <p id="scene3-desc" class="scene-desc" style="font-size: 17px; margin-bottom: 24px;">
+              PostPilot utilizes TikTok's official Content Posting API v2. The <strong style="color: #fe2c55;">video.publish</strong> and <strong style="color: #fe2c55;">video.upload</strong> scopes enable initializing the post and streaming chunks directly to TikTok.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="color: #fe2c55; font-size: 20px;">🎬</div>
+                <div style="font-size: 14px; color: #d4d4d8;">Direct Video Post with privacy level: <strong style="color: #fff;">PUBLIC_TO_EVERYONE</strong>.</div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="color: #fe2c55; font-size: 20px;">⚡</div>
+                <div style="font-size: 14px; color: #d4d4d8;">Chunked HTTP PUT transfer directly to TikTok CDN upload URLs.</div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="color: #fe2c55; font-size: 20px;">📝</div>
+                <div style="font-size: 14px; color: #d4d4d8;">Custom captions and hashtag presets per connected account.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UI Mockup: Composer -->
+          <div id="scene3-mockup" class="mockup-window">
+            <div class="mockup-bar">
+              <div class="mockup-dot" style="background: #ef4444;"></div>
+              <div class="mockup-dot" style="background: #f59e0b;"></div>
+              <div class="mockup-dot" style="background: #10b981;"></div>
+              <span style="font-size: 11px; color: #71717a; margin-left: 8px;">postpilot.creativeappslab.com/composer</span>
+            </div>
+            <div class="mockup-content">
+              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px;">
+                <div style="height: 220px; background: #000; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #71717a; font-size: 12px;">
+                  <span style="font-size: 24px; margin-bottom: 6px;">▶</span>
+                  <span>9:16 Video</span>
+                  <span style="font-size: 10px; color: #34d399; margin-top: 4px;">Ready (14.2MB)</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <span style="font-size: 12px; font-weight: 700; color: #a1a1aa;">CAPTION & HASHTAGS</span>
+                    <div style="background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; font-size: 13px; color: #fff; margin-top: 6px;">
+                      Transform your daily creative workflow! 🚀 #creator #viral #fyp
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style="font-size: 12px; font-weight: 700; color: #a1a1aa;">TARGET ACCOUNTS</span>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                      <span style="background: rgba(254,44,85,0.15); border: 1px solid rgba(254,44,85,0.3); color: #fe2c55; font-size: 11px; padding: 4px 8px; border-radius: 6px;">☑ @creative_fitness</span>
+                      <span style="background: rgba(254,44,85,0.15); border: 1px solid rgba(254,44,85,0.3); color: #fe2c55; font-size: 11px; padding: 4px 8px; border-radius: 6px;">☑ @creative_vlogs</span>
+                    </div>
+                  </div>
+
+                  <button style="width: 100%; background: linear-gradient(90deg, #fe2c55, #ff0050); border: none; border-radius: 10px; padding: 12px; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer;">
+                    🚀 Publish Now (2 Selected Accounts)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCENE 4: Job Monitor, Queue & Security (35.0s - 49.3s) -->
+      <section id="scene4" class="scene clip" data-start="35.0" data-duration="14.3" data-track-index="3">
+        <div class="mockup-grid">
+          <div>
+            <div id="scene4-badge" class="scene-badge badge-purple">Queue Pipeline & Security</div>
+            <h1 id="scene4-title" class="scene-title">
+              Real-Time Job Monitoring & <br />
+              Enterprise Data Security
+            </h1>
+            <p id="scene4-desc" class="scene-desc" style="font-size: 17px; margin-bottom: 24px;">
+              BullMQ background queues process publishing tasks asynchronously. If a profile encounters a rate limit, other accounts succeed smoothly while the failed account can be retried with one click.
+            </p>
+
+            <div class="cards-row" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="glass-card" style="padding: 18px;">
+                <div style="font-size: 14px; font-weight: 700; color: #34d399; margin-bottom: 6px;">🔒 AES-256-GCM Vault</div>
+                <div style="font-size: 12px; color: #a1a1aa;">All OAuth tokens are symmetrically encrypted at rest with unique random IVs.</div>
+              </div>
+
+              <div class="glass-card" style="padding: 18px;">
+                <div style="font-size: 14px; font-weight: 700; color: #25f4ee; margin-bottom: 6px;">🔄 Exponential Retry</div>
+                <div style="font-size: 12px; color: #a1a1aa;">Automatic retry strategy for network drops with zero duplicate publishing.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UI Mockup: Job Monitor -->
+          <div id="scene4-mockup" class="mockup-window">
+            <div class="mockup-bar">
+              <div class="mockup-dot" style="background: #ef4444;"></div>
+              <div class="mockup-dot" style="background: #f59e0b;"></div>
+              <div class="mockup-dot" style="background: #10b981;"></div>
+              <span style="font-size: 11px; color: #71717a; margin-left: 8px;">postpilot.creativeappslab.com/jobs/pub_8492</span>
+            </div>
+            <div class="mockup-content">
+              <div class="progress-box">
+                <svg width="60" height="60" viewBox="0 0 36 36">
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#27272a" stroke-width="3" />
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#34d399" stroke-width="3" stroke-dasharray="100, 100" />
+                  <text x="18" y="20.5" font-size="8" font-weight="bold" fill="#34d399" text-anchor="middle">100%</text>
+                </svg>
+                <div>
+                  <div style="font-size: 15px; font-weight: 700; color: #fff;">Bulk Dispatch Completed</div>
+                  <div style="font-size: 12px; color: #34d399;">2 of 2 creator posts successfully published to TikTok</div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="background: #18181b; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 13px; font-weight: 600; color: #fff;">@creative_fitness</span>
+                  <span style="background: rgba(16,185,129,0.2); color: #34d399; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">PUBLISHED</span>
+                </div>
+                <div style="background: #18181b; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 13px; font-weight: 600; color: #fff;">@creative_vlogs</span>
+                  <span style="background: rgba(16,185,129,0.2); color: #34d399; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">PUBLISHED</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCENE 5: Verification Summary & Closing (49.3s - 58.0s) -->
+      <section id="scene5" class="scene clip" data-start="49.3" data-duration="8.7" data-track-index="4">
+        <div style="text-align: center; max-width: 900px; margin: 0 auto;">
+          <div id="scene5-badge" class="scene-badge badge-emerald" style="margin: 0 auto 16px auto;">Compliance & Verification Summary</div>
+          <h1 id="scene5-title" class="scene-title">
+            Built with Transparency & Security First
+          </h1>
+          <p id="scene5-desc" class="scene-desc" style="margin: 0 auto 36px auto;">
+            CreativeAppsLab PostPilot satisfies all TikTok Developer Guidelines for Login Kit and Content Posting API.
+          </p>
+
+          <div id="scene5-cards" class="cards-row" style="text-align: left;">
+            <div class="glass-card">
+              <div style="font-size: 14px; font-weight: 700; color: #25f4ee; margin-bottom: 6px;">🌐 Official Website</div>
+              <div style="font-size: 13px; color: #fff; font-family: monospace;">creativeappslab.com</div>
+              <div style="font-size: 12px; color: #71717a; margin-top: 4px;">Dedicated app portal</div>
+            </div>
+
+            <div class="glass-card">
+              <div style="font-size: 14px; font-weight: 700; color: #fe2c55; margin-bottom: 6px;">🛡️ Privacy Policy</div>
+              <div style="font-size: 13px; color: #fff; font-family: monospace;">creativeappslab.com/privacy</div>
+              <div style="font-size: 12px; color: #71717a; margin-top: 4px;">Zero third-party data sharing</div>
+            </div>
+
+            <div class="glass-card">
+              <div style="font-size: 14px; font-weight: 700; color: #34d399; margin-bottom: 6px;">✓ Scopes Requested</div>
+              <div style="font-size: 12px; color: #fff; font-family: monospace;">user.info.basic, video.publish, video.upload</div>
+              <div style="font-size: 12px; color: #71717a; margin-top: 4px;">Full creator revocation control</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Timeline Scrubber Progress -->
+      <div class="bottom-timeline">
+        <div id="progress-bar" class="bottom-progress"></div>
+      </div>
+    </div>
+
+    <!-- GSAP Animation Master Timeline -->
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1: 0s - 8.2s
+      tl.from("#scene1-badge", { y: -20, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.2);
+      tl.from("#scene1-title", { y: 25, opacity: 0, duration: 0.8, ease: "power2.out" }, 0.4);
+      tl.from("#scene1-desc", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" }, 0.6);
+      tl.from("#scene1-cards .glass-card", { y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power2.out" }, 0.9);
+
+      // Scene 2: 8.2s - 22.4s
+      tl.from("#scene2-badge", { y: -20, opacity: 0, duration: 0.6, ease: "power2.out" }, 8.3);
+      tl.from("#scene2-title", { y: 25, opacity: 0, duration: 0.8, ease: "power2.out" }, 8.5);
+      tl.from("#scene2-desc", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" }, 8.7);
+      tl.from("#scene2-mockup", { scale: 0.95, opacity: 0, duration: 0.9, ease: "back.out(1.2)" }, 8.9);
+
+      // Scene 3: 22.4s - 35.0s
+      tl.from("#scene3-badge", { y: -20, opacity: 0, duration: 0.6, ease: "power2.out" }, 22.5);
+      tl.from("#scene3-title", { y: 25, opacity: 0, duration: 0.8, ease: "power2.out" }, 22.7);
+      tl.from("#scene3-desc", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" }, 22.9);
+      tl.from("#scene3-mockup", { scale: 0.95, opacity: 0, duration: 0.9, ease: "back.out(1.2)" }, 23.1);
+
+      // Scene 4: 35.0s - 49.3s
+      tl.from("#scene4-badge", { y: -20, opacity: 0, duration: 0.6, ease: "power2.out" }, 35.1);
+      tl.from("#scene4-title", { y: 25, opacity: 0, duration: 0.8, ease: "power2.out" }, 35.3);
+      tl.from("#scene4-desc", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" }, 35.5);
+      tl.from("#scene4-mockup", { scale: 0.95, opacity: 0, duration: 0.9, ease: "back.out(1.2)" }, 35.7);
+
+      // Scene 5: 49.3s - 58.0s
+      tl.from("#scene5-badge", { y: -20, opacity: 0, duration: 0.6, ease: "power2.out" }, 49.4);
+      tl.from("#scene5-title", { y: 25, opacity: 0, duration: 0.8, ease: "power2.out" }, 49.6);
+      tl.from("#scene5-desc", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" }, 49.8);
+      tl.from("#scene5-cards .glass-card", { y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power2.out" }, 50.1);
+
+      // Global Progress Bar
+      tl.to("#progress-bar", { width: "100%", duration: 58, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
