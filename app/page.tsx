@@ -1,67 +1,150 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { Sidebar } from "@/components/Sidebar";
+import { Navbar } from "@/components/Navbar";
+import { 
+  Send, 
+  Users, 
+  Activity, 
+  ArrowRight, 
+  CheckCircle2, 
+  ShieldCheck, 
+  Sparkles
+} from "lucide-react";
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
+      <Sidebar />
+
+      <main className="flex-1 flex flex-col min-w-0">
+        <Navbar
+          title="Overview"
+          subtitle="TikTok Multi-Account Bulk Publishing Platform"
+          action={{
+            label: "Open Composer",
+            href: "/composer",
+            icon: Send,
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+
+        <div className="p-8 max-w-6xl w-full mx-auto space-y-10">
+          {/* Hero Welcome Banner */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-950 border border-zinc-800 p-8 sm:p-10 shadow-2xl">
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-96 h-96 bg-gradient-to-br from-[#fe2c55]/20 to-[#25f4ee]/15 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="max-w-2xl relative z-10 space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fe2c55]/10 border border-[#fe2c55]/30 text-[#fe2c55] text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Next.js 16 + Docker Compose Pipeline</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                Upload once. Bulk publish to all your TikTok accounts.
+              </h2>
+
+              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+                PostPilot streamlines multi-account creator workflows. Connect several TikTok accounts via OAuth 2.0, fan out background publishing with BullMQ & Redis, schedule drops, and monitor per-account delivery with automatic retries.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Link
+                  href="/composer"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#fe2c55] to-[#ff0050] text-white font-bold text-sm px-6 py-3 rounded-xl shadow-lg shadow-[#fe2c55]/25 hover:shadow-xl hover:scale-[1.02] transition-all"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Start Bulk Post</span>
+                </Link>
+
+                <Link
+                  href="/accounts"
+                  className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold text-sm px-5 py-3 rounded-xl border border-zinc-700/60 transition-colors"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Manage Accounts</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Core Feature Pillars */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link
+              href="/accounts"
+              className="bg-zinc-900/50 hover:bg-zinc-800/40 border border-zinc-800/80 hover:border-zinc-700 rounded-2xl p-6 transition-all duration-200 group"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-[#fe2c55]/15 text-zinc-300 group-hover:text-[#fe2c55] flex items-center justify-center mb-4 transition-colors">
+                <Users className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1 group-hover:text-[#fe2c55] transition-colors flex items-center justify-between">
+                <span>1. Multi-Account OAuth</span>
+                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Connect solo or agency TikTok creator accounts securely. Tokens are stored with AES-256-GCM encryption at rest and auto-refreshed.
+              </p>
+            </Link>
+
+            <Link
+              href="/composer"
+              className="bg-zinc-900/50 hover:bg-zinc-800/40 border border-zinc-800/80 hover:border-zinc-700 rounded-2xl p-6 transition-all duration-200 group"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+              <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-[#25f4ee]/15 text-zinc-300 group-hover:text-[#25f4ee] flex items-center justify-center mb-4 transition-colors">
+                <Send className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1 group-hover:text-[#25f4ee] transition-colors flex items-center justify-between">
+                <span>2. Bulk Composer</span>
+                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Drag and drop your video once. Customize hashtags, set schedules, select target profiles, and dispatch in 3 steps or fewer.
+              </p>
+            </Link>
+
+            <Link
+              href="/jobs"
+              className="bg-zinc-900/50 hover:bg-zinc-800/40 border border-zinc-800/80 hover:border-zinc-700 rounded-2xl p-6 transition-all duration-200 group"
+            >
+              <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-purple-500/15 text-zinc-300 group-hover:text-purple-400 flex items-center justify-center mb-4 transition-colors">
+                <Activity className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1 group-hover:text-purple-400 transition-colors flex items-center justify-between">
+                <span>3. Queue & Worker</span>
+                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Powered by Redis BullMQ worker processes. Tracks per-account upload progress and isolates transient errors with retry support.
+              </p>
+            </Link>
+          </div>
+
+          {/* Architecture Checklist Banner */}
+          <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Production Architecture Standards</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs text-zinc-300">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Next.js 16 App Router</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>PostgreSQL 16 + Prisma</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Redis + BullMQ Queues</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Docker & Docker Compose</span>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

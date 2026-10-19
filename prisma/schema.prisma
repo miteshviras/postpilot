@@ -1,0 +1,152 @@
+// Prisma schema for PostPilot - TikTok Bulk Posting System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String          @id @default(uuid())
+  email        String?         @unique
+  name         String?
+  accounts     TikTokAccount[]
+  videoAssets  VideoAsset[]
+  publishJobs  PublishJob[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@map("users")
+}
+
+model TikTokAccount {
+  id                    String           @id @default(uuid())
+  userId                String
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  openId                String           @unique
+  unionId               String?
+  handle                String
+  displayName           String
+  avatarUrl             String?
+  followerCount         Int              @default(0)
+  encryptedAccessToken  String
+  encryptedRefreshToken String
+  tokenExpiresAt        DateTime
+  refreshExpiresAt      DateTime?
+  scope                 String           @default("user.info.basic,video.publish,video.upload")
+  status                AccountStatus    @default(ACTIVE)
+  lastSyncAt            DateTime?
+  lastPublishAt         DateTime?
+  publishItems          PublishJobItem[]
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([userId])
+  @@map("tiktok_accounts")
+}
+
+enum AccountStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+model VideoAsset {
+  id              String       @id @default(uuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  originalName    String
+  storageKey      String       // local file path or S3 key
+  mimeType        String       @default("video/mp4")
+  sizeBytes       BigInt       @default(0)
+  durationSeconds Float?
+  width           Int?
+  height          Int?
+  thumbnailUrl    String?
+  publishJobs     PublishJob[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([userId])
+  @@map("video_assets")
+}
+
+model PublishJob {
+  id             String           @id @default(uuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoAssetId   String
+  videoAsset     VideoAsset       @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
+  defaultCaption String
+  status         JobStatus        @default(PENDING)
+  scheduledAt    DateTime?
+  totalAccounts  Int              @default(0)
+  successCount   Int              @default(0)
+  failedCount    Int              @default(0)
+  items          PublishJobItem[]
+  schedule       Schedule?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([userId])
+  @@map("publish_jobs")
+}
+
+enum JobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  PARTIAL_SUCCESS
+  FAILED
+}
+
+model PublishJobItem {
+  id              String          @id @default(uuid())
+  publishJobId    String
+  publishJob      PublishJob      @relation(fields: [publishJobId], references: [id], onDelete: Cascade)
+  accountId       String
+  account         TikTokAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customCaption   String?
+  status          ItemStatus      @default(PENDING)
+  tiktokPublishId String?
+  tiktokShareId   String?
+  errorMessage    String?
+  attemptCount    Int             @default(0)
+  responsePayload Json?
+  publishedAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([publishJobId])
+  @@index([accountId])
+  @@map("publish_job_items")
+}
+
+enum ItemStatus {
+  PENDING
+  UPLOADING
+  PROCESSING
+  PUBLISHED
+  FAILED
+}
+
+model Schedule {
+  id           String         @id @default(uuid())
+  publishJobId String         @unique
+  publishJob   PublishJob     @relation(fields: [publishJobId], references: [id], onDelete: Cascade)
+  scheduledFor DateTime
+  timezone     String         @default("UTC")
+  status       ScheduleStatus @default(SCHEDULED)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("schedules")
+}
+
+enum ScheduleStatus {
+  SCHEDULED
+  EXECUTED
+  CANCELLED
+}

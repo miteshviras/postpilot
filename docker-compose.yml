@@ -1,0 +1,108 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postpilot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postpilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postpilot_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-postpilot}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postpilot -d postpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: postpilot-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: postpilot-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-postpilot_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-postpilot_minio_secret}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: postpilot-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postpilot}:${POSTGRES_PASSWORD:-postpilot_secret}@postgres:5432/${POSTGRES_DB:-postpilot}?schema=public
+      - REDIS_URL=redis://redis:6379
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-super_secret_postpilot_jwt_signing_key_32bytes}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - TIKTOK_CLIENT_ID=${TIKTOK_CLIENT_ID:-mock_tiktok_client_id}
+      - TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET:-mock_tiktok_client_secret}
+      - TIKTOK_REDIRECT_URI=${TIKTOK_REDIRECT_URI:-http://localhost:3000/api/auth/tiktok/callback}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-postpilot_minio}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-postpilot_minio_secret}
+      - AWS_BUCKET=${AWS_BUCKET:-postpilot-videos}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    container_name: postpilot-worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postpilot}:${POSTGRES_PASSWORD:-postpilot_secret}@postgres:5432/${POSTGRES_DB:-postpilot}?schema=public
+      - REDIS_URL=redis://redis:6379
+      - TIKTOK_CLIENT_ID=${TIKTOK_CLIENT_ID:-mock_tiktok_client_id}
+      - TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET:-mock_tiktok_client_secret}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-postpilot_minio}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-postpilot_minio_secret}
+      - AWS_BUCKET=${AWS_BUCKET:-postpilot-videos}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
